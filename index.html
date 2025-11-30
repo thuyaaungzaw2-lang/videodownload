@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>All-in-One Video Helper</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #02010a;
+      color: #f9fafb;
+      overflow: hidden;
+    }
+
+    /* ======= Background Kaneki Layer ======= */
+    .bg-layer {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at top left, rgba(248, 113, 113, 0.26), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(248, 113, 113, 0.3), transparent 60%);
+      z-index: -2;
+    }
+
+    .bg-image {
+      position: fixed;
+      inset: 0;
+      background-image: url(https://wallpapers.com/images/featured-full/kaneki-xsv5e4ut8mxmqae9.jpg);
+      background-position: center right;
+      background-size: cover;
+      opacity: 0.16;
+      mix-blend-mode: screen;
+      filter: saturate(1.2) contrast(1.05);
+      z-index: -3;
+    }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image: url("https://grainy-overlay.vercel.app/noise.png");
+      opacity: 0.35;
+      mix-blend-mode: soft-light;
+      z-index: -1;
+    }
+
+    /* ======= App Card ======= */
+    .app-shell {
+      width: 100%;
+      max-width: 500px;
+      padding: 18px;
+    }
+
+    .app-container {
+      width: 100%;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.97), rgba(10, 10, 10, 0.96));
+      border-radius: 20px;
+      padding: 20px 18px 16px;
+      border: 1px solid rgba(248, 113, 113, 0.35);
+      box-shadow:
+        0 22px 60px rgba(0, 0, 0, 0.8),
+        0 0 40px rgba(248, 113, 113, 0.15);
+      backdrop-filter: blur(20px);
+      animation: floatIn 0.8s ease-out both;
+    }
+
+    @keyframes floatIn {
+      from {
+        opacity: 0;
+        transform: translateY(18px) scale(0.96);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .app-header {
+      margin-bottom: 16px;
+    }
+
+    .badge-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(248, 113, 113, 0.7);
+      color: #fecaca;
+      background: radial-gradient(circle at top left, rgba(248, 113, 113, 0.25), transparent 60%);
+    }
+
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2);
+    }
+
+    .tiny-tag {
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #9ca3af;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 3px;
+    }
+
+    h1 span.accent {
+      color: #f97373;
+      text-shadow: 0 0 16px rgba(248, 113, 113, 0.7);
+    }
+
+    .subtitle {
+      font-size: 0.85rem;
+      color: #9ca3af;
+      max-width: 90%;
+    }
+
+    .form-group {
+      margin-top: 14px;
+    }
+
+    label {
+      font-size: 0.78rem;
+      color: #9ca3af;
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 11px 12px 11px 32px;
+      border-radius: 12px;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.9), rgba(3, 7, 18, 0.98));
+      color: #f9fafb;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border 0.18s ease, box-shadow 0.18s ease, transform 0.08s ease;
+    }
+
+    input[type="text"]:focus {
+      border-color: rgba(248, 113, 113, 0.9);
+      box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.5);
+      transform: translateY(-1px);
+    }
+
+    .input-icon {
+      position: absolute;
+      top: 50%;
+      left: 10px;
+      transform: translateY(-50%);
+      font-size: 12px;
+      color: #9ca3af;
+      pointer-events: none;
+    }
+
+    .platforms {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .chip {
+      flex: 1 1 90px;
+      font-size: 0.78rem;
+      padding: 7px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      text-align: center;
+      cursor: default;
+      background: rgba(15, 23, 42, 0.9);
+      color: #e5e7eb;
+      transition: border 0.18s ease, background 0.18s ease, transform 0.08s ease, box-shadow 0.18s ease;
+    }
+
+    .chip span.dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      margin-right: 4px;
+      background: #6b7280;
+    }
+
+    .chip.facebook { border-color: rgba(59, 130, 246, 0.6); }
+    .chip.youtube { border-color: rgba(248, 113, 113, 0.85); }
+    .chip.tiktok { border-color: rgba(168, 85, 247, 0.7); }
+
+    .chip.active {
+      transform: translateY(-1px);
+      box-shadow: 0 0 18px rgba(248, 113, 113, 0.35);
+      background: radial-gradient(circle at top, rgba(127, 29, 29, 0.9), rgba(15, 23, 42, 0.96));
+      border-color: rgba(248, 113, 113, 1);
+    }
+
+    .chip.active span.dot {
+      background: #fca5a5;
+    }
+
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+      align-items: center;
+    }
+
+    select {
+      flex: 1 1 150px;
+      padding: 9px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    select:focus {
+      border-color: rgba(248, 113, 113, 0.85);
+      box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.5);
+    }
+
+    button.primary {
+      flex: 1 1 130px;
+      border: none;
+      border-radius: 12px;
+      padding: 11px 12px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      background: radial-gradient(circle at top left, #ef4444, #7f1d1d);
+      color: #f9fafb;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow:
+        0 12px 25px rgba(127, 29, 29, 0.8),
+        0 0 24px rgba(248, 113, 113, 0.45);
+      transition: transform 0.09s ease, box-shadow 0.12s ease, filter 0.12s ease, opacity 0.12s ease;
+    }
+
+    button.primary span.icon {
+      font-size: 1.05rem;
+    }
+
+    button.primary:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+      box-shadow:
+        0 18px 35px rgba(127, 29, 29, 0.95),
+        0 0 32px rgba(248, 113, 113, 0.6);
+    }
+
+    button.primary:active {
+      transform: translateY(1px);
+      box-shadow: none;
+      opacity: 0.9;
+    }
+
+    button.primary:disabled {
+      opacity: 0.6;
+      box-shadow: none;
+      cursor: wait;
+    }
+
+    .status {
+      margin-top: 10px;
+      font-size: 0.78rem;
+      min-height: 18px;
+    }
+
+    .status.ok { color: #bbf7d0; }
+    .status.error { color: #fecaca; }
+    .status.info { color: #facc15; }
+
+    .status .platform-label {
+      font-weight: 500;
+      color: #f97373;
+    }
+
+    .footer {
+      border-top: 1px solid rgba(31, 41, 55, 0.9);
+      margin-top: 14px;
+      padding-top: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.76rem;
+      color: #9ca3af;
+    }
+
+    .dev-name {
+      font-weight: 500;
+      color: #f9fafb;
+    }
+
+    @media (min-width: 768px) {
+      .app-container {
+        padding: 22px 22px 18px;
+      }
+      h1 {
+        font-size: 1.7rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-layer"></div>
+  <div class="bg-image"></div>
+  <div class="noise"></div>
+
+  <div class="app-shell">
+    <div class="app-container">
+      <header class="app-header">
+        <div class="badge-row">
+          <div class="badge">
+            <span class="badge-dot"></span>
+            <span>Responsive • Kaneki Theme</span>
+          </div>
+          <span class="tiny-tag">multi platform</span>
+        </div>
+        <h1>
+          Video <span class="accent">Tool</span>
+        </h1>
+        <p class="subtitle">
+          Paste your link from Facebook, YouTube or TikTok. We&#39;ll detect the platform and send it to your backend.
+        </p>
+      </header>
+
+      <main>
+        <div class="form-group">
+          <label for="videoUrl">Video URL</label>
+          <div class="input-wrapper">
+            <span class="input-icon">⛓</span>
+            <input
+              type="text"
+              id="videoUrl"
+              placeholder="https://www.youtube.com/watch?v=..."
+              autocomplete="off"
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Detected platform</label>
+          <div class="platforms">
+            <div class="chip facebook" data-platform="facebook">
+              <span class="dot"></span>Facebook
+            </div>
+            <div class="chip youtube" data-platform="youtube">
+              <span class="dot"></span>YouTube
+            </div>
+            <div class="chip tiktok" data-platform="tiktok">
+              <span class="dot"></span>TikTok
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="resolution">Preferred resolution</label>
+          <div class="action-row">
+            <select id="resolution">
+              <option value="auto">Auto (best available)</option>
+              <option value="1080p">1080p</option>
+              <option value="720p">720p</option>
+              <option value="480p">480p</option>
+              <option value="360p">360p</option>
+            </select>
+
+            <button class="primary" id="downloadBtn">
+              <span>Start</span>
+              <span class="icon">⭳</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="status" class="status info">
+          Paste a link to auto-detect the platform.
+        </div>
+      </main>
+
+      <footer class="footer">
+        <span>
+          Developed by
+          <span class="dev-name">Thu Ya Aung Zaw</span>
+          <a href="https://www.facebook.com/thura.aungzaw.69" target="_blank" rel="noopener">
+         Facebook
+        </a>
+        </span>
+        <span>&copy; <span id="year"></span></span>
+      </footer>
+    </div>
+  </div>
+
+  <script src="./main.js"></script>
+</body>
+</html>
