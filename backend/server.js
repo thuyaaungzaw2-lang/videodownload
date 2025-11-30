@@ -119,7 +119,7 @@ app.post("/api/request", async (req, res) => {
   // ❗ ဒီနေရာက ပြင်ရမယ့်အချက်တစ်ခု
   // ကိုယ် အမြဲ down လိုချင်တဲ့ mp4 ဖိုင် URL ကိုဒီမှာထည့်
   // (ကိုယ်ပိုင် file server / own content ဖြစ်ရမယ်)
-  const demoDownloadUrl = "https://your-own-file-server.com/sample.mp4";
+ const demoDownloadUrl = "https://thuyaaungzaw2-lang.github.io/videodownload/videos/myvideo.mp4"; 
 
   return res.json({
     status: "ready",
