@@ -80,7 +80,7 @@ app.get("/", (req, res) => {
   });
 });
 
-// Main API
+// Main API – auto generate download link
 app.post("/api/request", async (req, res) => {
   const { videoUrl, resolution = "auto", platform } = req.body || {};
 
@@ -91,16 +91,13 @@ app.post("/api/request", async (req, res) => {
     });
   }
 
-  // Frontend က detect လိုက်သလို backend မှာလည်း detect ထပ်လုပ်တယ်
   const detectedPlatform = detectPlatformFromUrl(videoUrl);
   const clientPlatform = (platform || "").toLowerCase();
 
-  // platform အမှန်တကယ် ဒြပ်စုံမိ မစုံမစုံ စစ်ကြည့်
   if (detectedPlatform === "unknown") {
     console.warn("Unknown platform for URL:", videoUrl);
   }
 
-  // client side နဲ့ backend detect မကိုက်ရင် log ထားမယ် (security အနည်းငယ်)
   if (
     clientPlatform &&
     detectedPlatform !== "unknown" &&
@@ -119,12 +116,15 @@ app.post("/api/request", async (req, res) => {
     detectedPlatform,
   });
 
-  // ⚠️ Demoအတွက် — အမြဲတမ်း ready + sample download URL တစ်ခုပဲ ပြန်ပေးထားတယ်
-  // ကိုယ်ပိုင် file server / ကိုယ်ပိုင် content URL နဲ့ အောက်က link ကို အစားထိုးသုံးပါ
+  // ❗ ဒီနေရာက ပြင်ရမယ့်အချက်တစ်ခု
+  // ကိုယ် အမြဲ down လိုချင်တဲ့ mp4 ဖိုင် URL ကိုဒီမှာထည့်
+  // (ကိုယ်ပိုင် file server / own content ဖြစ်ရမယ်)
+  const demoDownloadUrl = "https://your-own-file-server.com/sample.mp4";
+
   return res.json({
     status: "ready",
-    message: "Your file is ready for download (demo response).",
-    downloadUrl: "https://your-own-file-server.com/sample.mp4",
+    message: "Your file is ready for download.",
+    downloadUrl: demoDownloadUrl,
     info: {
       videoUrl,
       requestedResolution: resolution,
