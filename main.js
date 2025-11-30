@@ -127,14 +127,32 @@ downloadBtn.addEventListener("click", async () => {
       }
     );
 
-    // network OK ဖြစ်ပေမဲ့ server side error ဖြစ်နိုင်လို့ ဒီမှာစစ်
-    if (!response.ok) {
-      console.log("Response not OK, status =", response.status);
-      throw new Error("Server returned an error.");
+    // Server response ကို text အရင်ဖတ်ထားမယ် (debug အတွက်)
+    const rawText = await response.text();
+    console.log("Raw response text:", rawText);
+
+    let data;
+    try {
+      data = rawText ? JSON.parse(rawText) : {};
+    } catch (e) {
+      console.error("JSON parse error:", e);
+      setStatus(
+        "Server responded, but not in JSON format: " + rawText,
+        "error"
+      );
+      return;
     }
 
-    const data = await response.json();
-    console.log("Response JSON:", data);
+    if (!response.ok) {
+      console.log("Response not OK, status =", response.status, data);
+      setStatus(
+        data.message || `Server error: ${response.status}`,
+        "error"
+      );
+      return;
+    }
+
+    console.log("Parsed JSON:", data);
 
     if (data.status === "queued") {
       setStatus(
@@ -155,7 +173,10 @@ downloadBtn.addEventListener("click", async () => {
     }
   } catch (err) {
     console.error("Client error:", err);
-    setStatus("Something went wrong while talking to the server.", "error");
+    setStatus(
+      "Network error while talking to the server: " + err.message,
+      "error"
+    );
   } finally {
     downloadBtn.disabled = false;
   }
