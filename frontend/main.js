@@ -119,17 +119,25 @@ downloadBtn.addEventListener("click", async () => {
 
   try {
     // Railway backend URL ကို သင့် domain နဲ့ ပြောင်းထည့်
-    const response = await fetch("https://videodownload-production.up.railway.app", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ videoUrl, resolution, platform }),
-    });
+try {
+  const response = await fetch("https://videodownload-production.up.railway.app/api/request", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ videoUrl, resolution, platform }),
+  });
 
-    if (!response.ok) {
-      throw new Error("Server returned an error.");
-    }
+  if (!response.ok) {
+    throw new Error("Server returned an error.");
+  }
 
-    const data = await response.json();
+  const data = await response.json();
+  console.log(data);
+}
+catch (err) {
+  console.error(err);
+  setStatus("Something went wrong while talking to the server.", "error");
+}
+
 
     if (data.status === "queued") {
       setStatus("Request received. Backend will handle it according to its own rules.", "ok");
