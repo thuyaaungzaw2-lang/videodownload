@@ -81,7 +81,10 @@ function updatePlatformState() {
 
   if (platform === "unknown") {
     highlightPlatform("none");
-    setStatus("URL looks valid but platform is <span class=\"platform-label\">unknown</span>.", "info");
+    setStatus(
+      'URL looks valid but platform is <span class="platform-label">unknown</span>.',
+      "info"
+    );
   } else {
     highlightPlatform(platform);
     const label = platform.charAt(0).toUpperCase() + platform.slice(1);
@@ -92,12 +95,12 @@ function updatePlatformState() {
   }
 }
 
-// input auto detect
+// auto-detect while typing
 ["input", "blur", "change"].forEach((evt) => {
   urlInput.addEventListener(evt, updatePlatformState);
 });
 
-// button click
+// main click handler
 downloadBtn.addEventListener("click", async () => {
   const videoUrl = urlInput.value.trim();
   const resolution = resolutionSelect.value;
@@ -181,40 +184,3 @@ downloadBtn.addEventListener("click", async () => {
     downloadBtn.disabled = false;
   }
 });
-
-  try {
-    // Railway backend URL ကို သင့် domain နဲ့ ပြောင်းထည့်
-try {
-  const response = await fetch("https://videodownload-production.up.railway.app/api/request", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ videoUrl, resolution, platform }),
-  });
-
-  if (!response.ok) {
-    throw new Error("Server returned an error.");
-  }
-
-  const data = await response.json();
-  console.log(data);
-}
-catch (err) {
-  console.error(err);
-  setStatus("Something went wrong while talking to the server.", "error");
-}
-
-
-   const data = await response.json();
-
-// status field ကိုစစ်ကြည့်မယ်
-if (data.status === "queued") {
-  setStatus(
-    `Request received ✔ Platform: ${platform || "unknown"}. Backend will handle it.`,
-    "ok"
-  );
-} else if (data.status === "ready" && data.downloadUrl) {
-  setStatus("Your file is ready. Starting download…", "ok");
-  window.location.href = data.downloadUrl;
-} else {
-  setStatus(data.message || "Request completed, but no download URL returned.", "info");
-}
