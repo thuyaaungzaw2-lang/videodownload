@@ -119,7 +119,7 @@ downloadBtn.addEventListener("click", async () => {
 
   try {
     // Railway backend URL ကို သင့် domain နဲ့ ပြောင်းထည့်
-    const response = await fetch("https://your-railway-backend-url.com/api/request", {
+    const response = await fetch("https://videodownload-production.up.railway.app", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ videoUrl, resolution, platform }),
