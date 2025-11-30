@@ -172,25 +172,24 @@ if (downloadBtn) {
           "ok"
         );
       } else if (data.status === "ready" && data.downloadUrl) {
-        setStatus("Your file is ready. Starting download…", "ok");
-        // 🔥 auto download here
-       } else if (data.status === "ready" && data.downloadUrl) {
+        } else if (data.status === "ready" && data.downloadUrl) {
   setStatus(
     'Your file is ready. If download does not start, ' +
       `<a href="${data.downloadUrl}" download class="download-link">click here</a>.`,
     "ok"
   );
 
-  // 🔥 Auto download using <a download>
+  // 🔥 Auto download
   try {
     const a = document.createElement("a");
     a.href = data.downloadUrl;
-    a.download = ""; // "myvideo.mp4" လို့လည်း အမည် assign လုပ်လိုရတယ်
+    a.download = ""; // browser ကို "save as" အနေနဲ့ သဘောကြောင့်
     document.body.appendChild(a);
     a.click();
     a.remove();
   } catch (e) {
     console.error("Auto-download failed, showing link only:", e);
-    // link text က already status ထဲမှာ ရှိနေပြီးသား
   }
+}
+
 }
