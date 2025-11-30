@@ -139,18 +139,17 @@ catch (err) {
 }
 
 
-    if (data.status === "queued") {
-      setStatus("Request received. Backend will handle it according to its own rules.", "ok");
-    } else if (data.status === "ready" && data.downloadUrl) {
-      setStatus("Your file is ready. Starting download…", "ok");
-      window.location.href = data.downloadUrl;
-    } else {
-      setStatus(data.message || "Request completed, but no download URL returned.", "info");
-    }
-  } catch (err) {
-    console.error(err);
-    setStatus("Something went wrong while talking to the server.", "error");
-  } finally {
-    downloadBtn.disabled = false;
-  }
-});
+   const data = await response.json();
+
+// status field ကိုစစ်ကြည့်မယ်
+if (data.status === "queued") {
+  setStatus(
+    `Request received ✔ Platform: ${platform || "unknown"}. Backend will handle it.`,
+    "ok"
+  );
+} else if (data.status === "ready" && data.downloadUrl) {
+  setStatus("Your file is ready. Starting download…", "ok");
+  window.location.href = data.downloadUrl;
+} else {
+  setStatus(data.message || "Request completed, but no download URL returned.", "info");
+}
