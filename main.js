@@ -1,3 +1,4 @@
+// ----------------- DOM refs -----------------
 const urlInput = document.getElementById("videoUrl");
 const resolutionSelect = document.getElementById("resolution");
 const downloadBtn = document.getElementById("downloadBtn");
@@ -5,13 +6,12 @@ const statusText = document.getElementById("status");
 const yearSpan = document.getElementById("year");
 const platformChips = document.querySelectorAll(".chip[data-platform]");
 
-// Year in footer
+// footer year
 if (yearSpan) {
   yearSpan.textContent = new Date().getFullYear().toString();
 }
 
-// ---------- Helper functions ----------
-
+// ----------------- helpers -----------------
 function setStatus(message, type = "info") {
   if (!statusText) return;
   statusText.textContent = "";
@@ -35,6 +35,7 @@ function detectPlatformFromUrl(value) {
   try {
     url = new URL(value);
   } catch (e) {
+    // no scheme → https prepend
     try {
       url = new URL("https://" + value);
     } catch (err) {
@@ -100,14 +101,14 @@ function updatePlatformState() {
   }
 }
 
-// ---------- Auto-detect while typing ----------
+// ----------------- auto-detect events -----------------
 if (urlInput) {
   ["input", "blur", "change"].forEach((evt) => {
     urlInput.addEventListener(evt, updatePlatformState);
   });
 }
 
-// ---------- Main button click ----------
+// ----------------- main click handler -----------------
 if (downloadBtn) {
   downloadBtn.addEventListener("click", async () => {
     const videoUrl = urlInput.value.trim();
@@ -141,7 +142,7 @@ if (downloadBtn) {
       const rawText = await response.text();
       console.log("Raw response text:", rawText);
 
-      let data;
+      let data = {};
       try {
         data = rawText ? JSON.parse(rawText) : {};
       } catch (e) {
@@ -164,32 +165,38 @@ if (downloadBtn) {
 
       console.log("Parsed JSON:", data);
 
-      if (data.status === "queued") {
+      if (data.status === "ready" && data.downloadUrl) {
+        setStatus(
+          'Your file is ready. Download will start automatically. ' +
+            `(If not, <a href="${data.downloadUrl}" class="download-link">click here</a>.)`,
+          "ok"
+        );
+
+        // ⭐ Auto download in new tab (app page မပြောင်းသွားအောင်)
+        window.open(data.downloadUrl, "_blank");
+      } else if (data.status === "queued") {
         setStatus(
           `Request received ✔ Platform: ${
             platform || "unknown"
           }. Backend will handle it.`,
           "ok"
         );
-      } else if (data.status === "ready" && data.downloadUrl) {
-        } else if (data.status === "ready" && data.downloadUrl) {
-  setStatus(
-    'Your file is ready. If download does not start, ' +
-      `<a href="${data.downloadUrl}" download class="download-link">click here</a>.`,
-    "ok"
-  );
-
-  // 🔥 Auto download
-  try {
-    const a = document.createElement("a");
-    a.href = data.downloadUrl;
-    a.download = ""; // browser ကို "save as" အနေနဲ့ သဘောကြောင့်
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-  } catch (e) {
-    console.error("Auto-download failed, showing link only:", e);
-  }
-}
-
+      } else {
+        setStatus(
+          data.message ||
+            "Request completed, but no download URL was returned by the server.",
+          "info"
+        );
+      }
+    } catch (err) {
+      console.error("Client error:", err);
+      setStatus(
+        "Network error while talking to the server: " + err.message,
+        "error"
+      );
+    } finally {
+      // မည်သည့် case မဆို button ကို ပြန် enable
+      downloadBtn.disabled = false;
+    }
+  });
 }
